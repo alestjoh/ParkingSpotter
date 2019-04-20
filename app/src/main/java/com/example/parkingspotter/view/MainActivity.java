@@ -1,18 +1,19 @@
 package com.example.parkingspotter.view;
 
 import android.Manifest;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import com.example.parkingspotter.R;
+import com.example.parkingspotter.viewmodel.MainViewModel;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 /**
  * Notes:
@@ -56,13 +57,28 @@ import com.google.android.gms.tasks.OnSuccessListener;
 public class MainActivity extends AppCompatActivity {
 
     public static final int REQUEST_LOCATION_PERMISSIONS = 17;
+    private double lat = 0, lng = 0;
+
+    MainViewModel viewModel = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        checkFineLocationPermissions();
+        //checkFineLocationPermissions();
+
+        viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+
+        viewModel.initRetrofit();
+        viewModel.searchForSpots(lat, lng);
+        viewModel.getError().observe(this, s ->
+                Toast.makeText(this, s, Toast.LENGTH_LONG).show());
+        viewModel.getSpots().observe(this, list -> {
+            Toast.makeText(this,
+                    "List: " + list,
+                    Toast.LENGTH_LONG).show();
+        });
     }
 
     private void checkFineLocationPermissions() {
@@ -93,10 +109,9 @@ public class MainActivity extends AppCompatActivity {
                 this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             fusedLocationProviderClient.getLastLocation().addOnSuccessListener(location -> {
-
+                lat = location.getLatitude();
+                lng = location.getLongitude();
             });
         }
-
-        //TODO: Inform viewmodel of device location
     }
 }
