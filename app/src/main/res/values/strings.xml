@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">ParkingSpotter</string>
+    <string name="search">Search</string>
+    <string name="find">Find</string>
+    <string name="reservation">Reservation</string>
+    <string name="my_car">My Car</string>
+
 </resources>
