@@ -61,12 +61,17 @@ public class MainActivity extends AppCompatActivity {
 
     MainViewModel viewModel = null;
 
+    FusedLocationProviderClient locationProviderClient;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //checkFineLocationPermissions();
+        locationProviderClient = LocationServices
+                .getFusedLocationProviderClient(this);
+
+        checkFineLocationPermissions();
 
         viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
 
@@ -103,14 +108,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateDeviceLocation() {
-        FusedLocationProviderClient fusedLocationProviderClient =
-                LocationServices.getFusedLocationProviderClient(this);
         if (ActivityCompat.checkSelfPermission(
                 this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(location -> {
-                lat = location.getLatitude();
-                lng = location.getLongitude();
+            locationProviderClient.getLastLocation().addOnSuccessListener(location -> {
+                if (location == null) {
+                    Toast.makeText(MainActivity.this,
+                            "No location data!",
+                            Toast.LENGTH_LONG).show();
+                } else {
+                    lat = location.getLatitude();
+                    lng = location.getLongitude();
+                }
             });
         }
     }
